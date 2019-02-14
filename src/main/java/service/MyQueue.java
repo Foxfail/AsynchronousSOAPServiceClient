@@ -31,12 +31,12 @@ import java.util.ArrayList;
     }
     private static void notifyInboundQueueChanged(){
         for (QueueListener listener : listeners){
-            listener.onInboundQueueChanged();
+            listener.onInboundQueueMessageAdded();
         }
     }
     private static void notifyOutboundQueueChanged(){
         for (QueueListener listener : listeners){
-            listener.onOutboundQueueChanged();
+            listener.onOutboundQueueMessageAdded();
         }
     }
 }

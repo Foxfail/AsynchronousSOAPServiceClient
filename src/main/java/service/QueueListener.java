@@ -1,6 +1,6 @@
 package service;
 
 public interface QueueListener {
-    void onInboundQueueChanged();
-    void onOutboundQueueChanged();
+    void onInboundQueueMessageAdded();
+    void onOutboundQueueMessageAdded();
 }

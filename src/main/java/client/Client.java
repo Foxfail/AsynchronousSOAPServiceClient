@@ -19,9 +19,7 @@ public class Client implements AsyncInterface, Serializable {
         Service service = Service.create(wsdlURL, qNameService);
 
         System.out.println("trying to connect");
-
         AsyncInterface ps = service.getPort(qNamePort, AsyncInterface.class);
-
         System.out.println("connected");
 
         // REQUEST ORIGINATOR
@@ -29,9 +27,11 @@ public class Client implements AsyncInterface, Serializable {
         String data = "INN";
 
         //тут формируется сообщение
+        System.out.println("forming message");
         SOAPMessage soapMessage = makeSOAPMessage(data, callback);
 
 //        MyMessage message = new MyMessage(data, callback);
+        System.out.println("sending message");
         ps.SOAPRequest(soapMessage);
 
         System.out.println("sent!");

@@ -35,7 +35,8 @@ public class AsyncImpl implements AsyncInterface {
 
     @WebMethod
     public void SOAPResponse(SOAPMessage message) {
-
+        // тут обрабатываются ответы на запросы.
+        // поскольку сервер не делает запросов, то и ответов никаких от клиента не надо обрабатывать
     }
 
     static void messageProcessed(AsyncInterface callback) {

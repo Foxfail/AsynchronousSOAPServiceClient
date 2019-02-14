@@ -92,7 +92,7 @@ class QueueProcessor implements QueueListener{
 
 
     @Override
-    public void onInboundQueueChanged() {
+    public void onInboundQueueMessageAdded() {
         try {
             processQueue();
         } catch (SOAPException | IOException | ClassNotFoundException e) {
@@ -100,7 +100,7 @@ class QueueProcessor implements QueueListener{
         }
     }
     @Override
-    public void onOutboundQueueChanged() {
+    public void onOutboundQueueMessageAdded() {
 
     }
 }
