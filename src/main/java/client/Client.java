@@ -1,6 +1,7 @@
 package client;
 
 
+import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
 import contract.AsyncInterface;
 
 import javax.xml.namespace.QName;
@@ -32,7 +33,11 @@ public class Client implements AsyncInterface, Serializable {
 
 //        MyMessage message = new MyMessage(data, callback);
         System.out.println("sending message");
-        ps.SOAPRequest(soapMessage);
+        try {
+            ps.SOAPRequest(soapMessage);
+        } catch (ServerSOAPFaultException e) {
+            e.printStackTrace();
+        }
 
         System.out.println("sent!");
     }
@@ -64,7 +69,7 @@ public class Client implements AsyncInterface, Serializable {
 
     private static SOAPMessage makeSOAPMessage(String data, Client clientCallback) throws SOAPException, IOException {
         // если не заработает то можно поменять протокол на 1.2
-        SOAPMessage soapMessage = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createMessage();
+        SOAPMessage soapMessage = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createMessage();
 
         // можно так
 //        SOAPPart soapPart = soapMessage.getSOAPPart();
@@ -84,11 +89,19 @@ public class Client implements AsyncInterface, Serializable {
         QName nameCallback = new QName("dataCallback");
         SOAPElement symbolCallback = bodyElement.addChildElement(nameCallback);
         symbolCallback.addTextNode(toString(clientCallback));
-
+        System.out.println(soapToString(soapMessage));
         return soapMessage;
     }
 
-
+    private static String soapToString(SOAPMessage msg) {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            msg.writeTo(out);
+        } catch (SOAPException | IOException e) {
+            e.printStackTrace();
+        }
+        return new String(out.toByteArray());
+    }
 
     @SuppressWarnings("unused")
     private static Object fromString(String s) throws IOException, ClassNotFoundException {
