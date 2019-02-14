@@ -3,10 +3,10 @@ package service;
 import javax.xml.soap.SOAPMessage;
 import java.util.ArrayList;
 
-public class MyQueue {
-    private static ArrayList<QueueListener> listeners = new ArrayList<QueueListener>();
-    private static ArrayList<SOAPMessage> inboundQueue = new ArrayList<SOAPMessage>();
-    private static ArrayList<SOAPMessage> outboundQueue = new ArrayList<SOAPMessage>();
+ class MyQueue {
+    private static ArrayList<QueueListener> listeners = new ArrayList<>();
+    private static ArrayList<SOAPMessage> inboundQueue = new ArrayList<>();
+    private static ArrayList<SOAPMessage> outboundQueue = new ArrayList<>();
 
 
     static void addInbound(SOAPMessage message) {
@@ -21,12 +21,11 @@ public class MyQueue {
     static SOAPMessage getInbound() {
         return inboundQueue.remove(0);
     }
-
     static SOAPMessage getOutbound() {
         return outboundQueue.remove(0);
     }
 
-    public static void addListener(QueueListener listener){
+            static void addListener(QueueListener listener){
         listeners.add(listener);
         listeners.trimToSize();
     }

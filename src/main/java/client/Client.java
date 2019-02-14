@@ -2,14 +2,11 @@ package client;
 
 
 import contract.AsyncInterface;
-import service.MyMessage;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.*;
 import javax.xml.ws.Service;
 import java.io.*;
-import java.io.Serializable;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Base64;
 
@@ -40,24 +37,34 @@ public class Client implements AsyncInterface, Serializable {
         System.out.println("sent!");
     }
 
-
     public void SOAPRequest(SOAPMessage message) {
 
     }
 
     // тут обрабатываю ответы от сервиса
-    public void SOAPResponse(SOAPMessage message) throws SOAPException {
-        SOAPBody soapBody = message.getSOAPBody();
-        java.util.Iterator iterator = soapBody.getChildElements(new QName("http://localhost:8888/", "Info"));
-        SOAPBodyElement bodyElement = (SOAPBodyElement)iterator.next();
-        String inn = bodyElement.getValue();
+
+    public void SOAPResponse(SOAPMessage message) {
+        SOAPBody soapBody = null;
+        try {
+            soapBody = message.getSOAPBody();
+        } catch (SOAPException e) {
+            e.printStackTrace();
+        }
+        java.util.Iterator iterator;
+        String inn = "null";
+        if (soapBody != null) {
+            iterator = soapBody.getChildElements(new QName("http://localhost:8888/", "Info"));
+
+            SOAPBodyElement bodyElement = (SOAPBodyElement) iterator.next();
+            inn = bodyElement.getValue();
+        }
         System.out.println("received INN = " + inn);
     }
 
 
     private static SOAPMessage makeSOAPMessage(String data, Client clientCallback) throws SOAPException, IOException {
         // если не заработает то можно поменять протокол на 1.2
-        SOAPMessage soapMessage = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createMessage();
+        SOAPMessage soapMessage = MessageFactory.newInstance(SOAPConstants.SOAP_1_2_PROTOCOL).createMessage();
 
         // можно так
 //        SOAPPart soapPart = soapMessage.getSOAPPart();
@@ -74,32 +81,28 @@ public class Client implements AsyncInterface, Serializable {
         SOAPElement symbol = bodyElement.addChildElement(name);
         symbol.addTextNode(data);
 
-        QName bodyCallbackName = new QName("http://localhost:8888/", "Callback");
-        SOAPBodyElement bodyCallbackElement = body.addBodyElement(bodyCallbackName);
         QName nameCallback = new QName("dataCallback");
-        SOAPElement symbolCallback = bodyCallbackElement.addChildElement(nameCallback);
+        SOAPElement symbolCallback = bodyElement.addChildElement(nameCallback);
         symbolCallback.addTextNode(toString(clientCallback));
 
         return soapMessage;
     }
 
 
-    /** Read the object from Base64 string. */
-    private static Object fromString( String s ) throws IOException ,
-            ClassNotFoundException {
-        byte [] data = Base64.getDecoder().decode( s );
+
+    @SuppressWarnings("unused")
+    private static Object fromString(String s) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(s);
         ObjectInputStream ois = new ObjectInputStream(
-                new ByteArrayInputStream(  data ) );
-        Object o  = ois.readObject();
+                new ByteArrayInputStream(data));
+        Object o = ois.readObject();
         ois.close();
         return o;
     }
-
-    /** Write the object to a Base64 string. */
-    private static String toString( Serializable o ) throws IOException {
+    private static String toString(Serializable o) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream( baos );
-        oos.writeObject( o );
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(o);
         oos.close();
         return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
