@@ -1,3 +1,4 @@
+
 package client;
 
 
@@ -30,11 +31,16 @@ public class Client implements AsyncInterface, Serializable {
         //тут формируется сообщение
         System.out.println("forming message");
         SOAPMessage soapMessage = makeSOAPMessage(data, callback);
-
+//        try {
+//            SOAPMessage soapMessage = createSOAPRequestTest();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        System.out.println();
 //        MyMessage message = new MyMessage(data, callback);
         System.out.println("sending message");
         try {
-            ps.SOAPRequest(soapMessage);
+//            ps.addDataRequest(soapMessage);
         } catch (ServerSOAPFaultException e) {
             e.printStackTrace();
         }
@@ -42,28 +48,29 @@ public class Client implements AsyncInterface, Serializable {
         System.out.println("sent!");
     }
 
-    public void SOAPRequest(SOAPMessage message) {
-
+    // тут обрабатывались бы запросы от сервиса, если бы он их слал
+    @Override
+    public Integer addDataRequest(String message) {
+        return 0;
     }
-
     // тут обрабатываю ответы от сервиса
-
-    public void SOAPResponse(SOAPMessage message) {
-        SOAPBody soapBody = null;
-        try {
-            soapBody = message.getSOAPBody();
-        } catch (SOAPException e) {
-            e.printStackTrace();
-        }
+    public String pollForResult(Integer inID) {
+//        SOAPBody soapBody = null;
+//        try {
+//            soapBody = message.getSOAPBody();
+//        } catch (SOAPException e) {
+//            e.printStackTrace();
+//        }
         java.util.Iterator iterator;
         String inn = "null";
-        if (soapBody != null) {
-            iterator = soapBody.getChildElements(new QName("http://localhost:8888/", "Info"));
-
-            SOAPBodyElement bodyElement = (SOAPBodyElement) iterator.next();
-            inn = bodyElement.getValue();
-        }
+//        if (soapBody != null) {
+//            iterator = soapBody.getChildElements(new QName("http://localhost:8888/", "Info"));
+//
+//            SOAPBodyElement bodyElement = (SOAPBodyElement) iterator.next();
+//            inn = bodyElement.getValue();
+//        }
         System.out.println("received INN = " + inn);
+        return null;
     }
 
 
@@ -72,26 +79,39 @@ public class Client implements AsyncInterface, Serializable {
         SOAPMessage soapMessage = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createMessage();
 
         // можно так
-//        SOAPPart soapPart = soapMessage.getSOAPPart();
-//        SOAPEnvelope envelope = soapPart.getEnvelope();
-//        SOAPHeader header = envelope.getHeader();
-//        SOAPBody body = envelope.getBody();
+        SOAPPart soapPart = soapMessage.getSOAPPart();
+        SOAPEnvelope soapEnvelope = soapPart.getEnvelope();
+        SOAPHeader soapHeader = soapEnvelope.getHeader();
+        SOAPBody soapBody = soapEnvelope.getBody();
 //        SOAPHeader header = soapMessage.getSOAPHeader(); // пустой поэтому не нужен
-        // но удобнее так
-        SOAPBody body = soapMessage.getSOAPBody();
+        soapEnvelope.removeNamespaceDeclaration("SOAP-ENV");
+        soapEnvelope.removeNamespaceDeclaration("env");
 
-        QName bodyName = new QName("http://localhost:8888/", "GetInfo");
-        SOAPBodyElement bodyElement = body.addBodyElement(bodyName);
+        soapEnvelope.setPrefix("soapenv");
+        soapHeader.setPrefix("soapenv");
+        soapBody.setPrefix("soapenv");
+//        soapEnvelope.addNamespaceDeclaration("S1", "http://schemas.xmlsoap.org/soap/envelope/");
+
+        soapEnvelope.addNamespaceDeclaration("loc", "http://localhost:8888/");
+
+
+        QName bodyName = new QName("loc:addDataRequest");
+        SOAPBodyElement bodyElement = soapBody.addBodyElement(bodyName);
         QName name = new QName("dataRequest");
         SOAPElement symbol = bodyElement.addChildElement(name);
         symbol.addTextNode(data);
 
+
         QName nameCallback = new QName("dataCallback");
         SOAPElement symbolCallback = bodyElement.addChildElement(nameCallback);
         symbolCallback.addTextNode(toString(clientCallback));
-        System.out.println(soapToString(soapMessage));
+
+        soapMessage.saveChanges(); // сохраняет изменения ???
+        System.out.println(soapToString(soapMessage)); // выводит xml в консоль
+
         return soapMessage;
     }
+
 
     private static String soapToString(SOAPMessage msg) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -119,4 +139,5 @@ public class Client implements AsyncInterface, Serializable {
         oos.close();
         return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
+
 }

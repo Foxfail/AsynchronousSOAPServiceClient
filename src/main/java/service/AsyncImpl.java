@@ -7,7 +7,6 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Endpoint;
 
 @SuppressWarnings("DefaultAnnotationParam")
@@ -26,22 +25,26 @@ public class AsyncImpl implements AsyncInterface {
 
     // Тут обрабатываю запросы от клиентов
     @WebMethod
-    public void SOAPRequest(SOAPMessage message) {
+    public Integer addDataRequest(String message) {
         // сообщение отправляется в очередь входящих
         // где вызывает событие "очередь входящих изменена"
         // это событие запускает обработчик очереди и далее обрабатывается
-        MyQueue.addInbound(message);
+        System.out.println("addDataRequest inbound");
+
+        Integer inID = MyQueue.addInbound(message);
+        System.out.println("sending inbound id = " + inID);
+        return inID;
     }
 
     @WebMethod
-    public void SOAPResponse(SOAPMessage message) {
+    public String pollForResult(Integer inID) {
         // тут обрабатываются ответы на запросы.
         // поскольку сервер не делает запросов, то и ответов никаких от клиента не надо обрабатывать
+        return null;
     }
-
-    static void messageProcessed(AsyncInterface callback) {
-        SOAPMessage message = MyQueue.getOutbound();
-        callback.SOAPResponse(message);
-    }
+//    static void messageProcessed(String callback) {
+//        SOAPMessage message = MyQueue.getOutbound();
+//        callback.pollForResult(message);
+//    }
 
 }

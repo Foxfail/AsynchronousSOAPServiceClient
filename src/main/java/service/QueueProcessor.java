@@ -6,29 +6,31 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.*;
 import java.io.*;
 import java.util.Base64;
+import java.util.Map;
 
-class QueueProcessor implements QueueListener{
+class QueueProcessor implements QueueListener {
 
 
     // ОБРАБОТКА ОЧЕРЕДИ
     private static void processQueue() throws SOAPException, IOException, ClassNotFoundException {
+        System.out.println("processQueue");
         // message in
-        SOAPMessage messageIn = MyQueue.getInbound();
+        Map.Entry<Integer, String> messageIn = MyQueue.getInbound();
         String dataOut;
 
         // process message
-        String dataIn = getDataFromRequest(messageIn);
-        if (dataIn.equals("INN")){
+//        String dataIn = getDataFromRequest(messageIn);
+        if (messageIn.getValue().equals("INN")) {
             dataOut = "7731000101923";
         } else {
             dataOut = "error";
         }
 
         // message out
-        SOAPMessage messageOut = makeSoapMessage(dataOut);
-        MyQueue.addOutbound(messageOut);
+//        SOAPMessage messageOut = makeSoapMessage(dataOut);
+        MyQueue.addOutbound(messageIn.getKey(), dataOut);
 
-        AsyncImpl.messageProcessed(getCallBackFromRequest(messageIn));
+//        AsyncImpl.messageProcessed(getCallBackFromRequest(messageIn));
     }
 
 
@@ -46,46 +48,54 @@ class QueueProcessor implements QueueListener{
 
         SOAPElement symbol = bodyElement.addChildElement(name);
         symbol.addTextNode(data);
+
         return soapMessage;
     }
 
 
     // ПОЛУЧЕНИЕ ДАННЫХ ИЗ SOAPMESSAGE
     private static String getDataFromRequest(SOAPMessage message) throws SOAPException {
+        System.out.print("getDataFromRequest...");
         SOAPBody soapBody = message.getSOAPBody();
-        java.util.Iterator iterator = soapBody.getChildElements(new QName("http://localhost:8888/", "GetInfo"));
-        SOAPBodyElement bodyElement = (SOAPBodyElement)iterator.next();
-        return bodyElement.getValue();
+        java.util.Iterator iterator = soapBody.getChildElements(new QName("GetInfo"));
+        SOAPBodyElement bodyElement = (SOAPBodyElement) iterator.next();
+        String value = bodyElement.getValue();
+        System.out.println("success");
+        return value;
     }
+
     private static AsyncInterface getCallBackFromRequest(SOAPMessage message) throws SOAPException, IOException, ClassNotFoundException {
+        System.out.print("getCallBackFromRequest...");
         SOAPBody soapBody = message.getSOAPBody();
         java.util.Iterator iterator = soapBody.getChildElements(new QName("http://localhost:8888/", "Callback"));
-        SOAPBodyElement bodyElement = (SOAPBodyElement)iterator.next();
+        SOAPBodyElement bodyElement = (SOAPBodyElement) iterator.next();
         String data = bodyElement.getValue();
 
         Object o = fromString(data);
         AsyncInterface asyncInterface = null;
-        if (o instanceof AsyncInterface){
+        if (o instanceof AsyncInterface) {
             asyncInterface = (AsyncInterface) o;
         }
+        System.out.println("success");
         return asyncInterface;
     }
 
 
     // СЕРИАЛИЗАЦИЯ \ ДЕСЕРИАЛИЗАЦИЯ
-    private static Object fromString( String s ) throws IOException, ClassNotFoundException {
-        byte [] data = Base64.getDecoder().decode( s );
+    private static Object fromString(String s) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(s);
         ObjectInputStream ois = new ObjectInputStream(
-                new ByteArrayInputStream(  data ) );
-        Object o  = ois.readObject();
+                new ByteArrayInputStream(data));
+        Object o = ois.readObject();
         ois.close();
         return o;
     }
+
     @SuppressWarnings("unused")
-    private static String toString(Serializable o ) throws IOException {
+    private static String toString(Serializable o) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream( baos );
-        oos.writeObject( o );
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(o);
         oos.close();
         return Base64.getEncoder().encodeToString(baos.toByteArray());
     }
@@ -99,6 +109,7 @@ class QueueProcessor implements QueueListener{
             e.printStackTrace();
         }
     }
+
     @Override
     public void onOutboundQueueMessageAdded() {
 

@@ -1,27 +1,38 @@
 package service;
 
+import client.Client;
+
 import javax.xml.soap.SOAPMessage;
-import java.util.ArrayList;
+import java.util.*;
 
- class MyQueue {
+class MyQueue {
     private static ArrayList<QueueListener> listeners = new ArrayList<>();
-    private static ArrayList<SOAPMessage> inboundQueue = new ArrayList<>();
-    private static ArrayList<SOAPMessage> outboundQueue = new ArrayList<>();
+    static int inID = -1;
+    private static LinkedHashMap<Integer, String> inboundQueue = new LinkedHashMap<>();
+    private static LinkedHashMap<Integer, String> outboundQueue = new LinkedHashMap<>();
 
 
-    static void addInbound(SOAPMessage message) {
-        inboundQueue.add(message);
+    static Integer addInbound(String message) {
+        inID++;
+        inboundQueue.put(inID, message);
         notifyInboundQueueChanged();
+        return inID;
     }
-    static void addOutbound(SOAPMessage message) {
-        outboundQueue.add(message);
+    static Integer addOutbound(Integer inID, String message) {
+        outboundQueue.put(inID, message);
+        System.out.println("adding outbound id = " + inID);
         notifyOutboundQueueChanged();
+        return inID;
     }
 
-    static SOAPMessage getInbound() {
-        return inboundQueue.remove(0);
+
+    static Map.Entry<Integer, String> getInbound() {
+        Map.Entry<Integer, String> entry = inboundQueue.entrySet().iterator().next();
+        System.out.println("getting and removing inbound. id = " + entry.getKey());
+        inboundQueue.remove(entry.getKey());
+        return entry;
     }
-    static SOAPMessage getOutbound() {
+    static String getOutbound() {
         return outboundQueue.remove(0);
     }
 
