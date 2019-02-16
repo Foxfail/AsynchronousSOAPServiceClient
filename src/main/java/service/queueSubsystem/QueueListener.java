@@ -1,4 +1,4 @@
-package service.threadPoolSubsystem.QueueSubsystem;
+package service.queueSubsystem;
 
 public interface QueueListener {
     default void onInboundQueueMessageAdded() {}

@@ -1,4 +1,4 @@
-package service.threadPoolSubsystem.QueueSubsystem;
+package service.queueSubsystem;
 
 import java.util.*;
 

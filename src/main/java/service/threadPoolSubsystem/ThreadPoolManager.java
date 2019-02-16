@@ -1,14 +1,14 @@
 package service.threadPoolSubsystem;
 
-import service.threadPoolSubsystem.QueueSubsystem.MyQueue;
-import service.threadPoolSubsystem.QueueSubsystem.QueueListener;
+import service.queueSubsystem.MyQueue;
+import service.queueSubsystem.QueueListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ThreadPoolManager implements QueueListener, ThreadPoolListener {
 
-    ThreadPool threadPool;
+    private ThreadPool threadPool;
 
     public ThreadPoolManager() {
         threadPool = new ThreadPool();

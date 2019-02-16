@@ -1,8 +1,8 @@
 package service;
 
 import contract.AsyncInterface;
-import service.threadPoolSubsystem.QueueSubsystem.MyQueue;
-import service.threadPoolSubsystem.QueueSubsystem.QueueProcessor;
+import service.queueSubsystem.MyQueue;
+import service.queueSubsystem.QueueProcessor;
 import service.threadPoolSubsystem.ThreadPoolManager;
 
 import javax.jws.WebMethod;
