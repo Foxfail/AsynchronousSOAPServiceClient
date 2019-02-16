@@ -1,18 +1,15 @@
-package service;
+package service.threadPoolSubsystem.QueueSubsystem;
 
-import client.Client;
-
-import javax.xml.soap.SOAPMessage;
 import java.util.*;
 
-class MyQueue {
+public class MyQueue {
     private static ArrayList<QueueListener> listeners = new ArrayList<>();
-    static int inID = -1;
+    private static int inID = -1;
     private static LinkedHashMap<Integer, String> inboundQueue = new LinkedHashMap<>();
     private static LinkedHashMap<Integer, String> outboundQueue = new LinkedHashMap<>();
 
 
-    static Integer addInbound(String message) {
+    public static Integer addInbound(String message) {
         inID++;
         inboundQueue.put(inID, message);
         notifyInboundQueueChanged();
@@ -32,11 +29,11 @@ class MyQueue {
         inboundQueue.remove(entry.getKey());
         return entry;
     }
-    static String getOutbound() {
+    public static String getOutbound() {
         return outboundQueue.remove(0);
     }
 
-            static void addListener(QueueListener listener){
+    public static void addListener(QueueListener listener){
         listeners.add(listener);
         listeners.trimToSize();
     }

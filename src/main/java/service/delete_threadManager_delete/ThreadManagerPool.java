@@ -1,4 +1,4 @@
-package service.threadManager;
+package service.delete_threadManager_delete;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -8,7 +8,7 @@ public class ThreadManagerPool {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         // получает несколько потоков
         args = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-//        ThreadManager threadManager = new ThreadManager();
+//        ThreadManager delete_threadManager_delete = new ThreadManager();
         ExecutorService executorService = Executors.newFixedThreadPool(NUMBER_OF_THREADS);
         Set<Future<String>> set = new HashSet<>();
         for (String word: args) {

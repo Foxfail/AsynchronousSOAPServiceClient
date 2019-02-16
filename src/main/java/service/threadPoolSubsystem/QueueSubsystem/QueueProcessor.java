@@ -1,4 +1,4 @@
-package service;
+package service.threadPoolSubsystem.QueueSubsystem;
 
 import contract.AsyncInterface;
 
@@ -8,11 +8,11 @@ import java.io.*;
 import java.util.Base64;
 import java.util.Map;
 
-class QueueProcessor implements QueueListener {
+public class QueueProcessor implements QueueListener {
 
 
     // ОБРАБОТКА ОЧЕРЕДИ
-    private static void processQueue() throws SOAPException, IOException, ClassNotFoundException {
+    private static void processQueue() {
         System.out.println("processQueue");
         // message in
         Map.Entry<Integer, String> messageIn = MyQueue.getInbound();
@@ -103,11 +103,11 @@ class QueueProcessor implements QueueListener {
 
     @Override
     public void onInboundQueueMessageAdded() {
-        try {
+
             processQueue();
-        } catch (SOAPException | IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+
+
+
     }
 
     @Override

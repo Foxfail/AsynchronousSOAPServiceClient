@@ -1,4 +1,4 @@
-package service.threadManager;
+package service.delete_threadManager_delete;
 
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 public class WordLengthCallable implements Callable {
     private String word;
 
-    public WordLengthCallable(String word) {
+    WordLengthCallable(String word) {
         this.word = word;
     }
 

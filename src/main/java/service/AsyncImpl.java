@@ -1,6 +1,9 @@
 package service;
 
 import contract.AsyncInterface;
+import service.threadPoolSubsystem.QueueSubsystem.MyQueue;
+import service.threadPoolSubsystem.QueueSubsystem.QueueProcessor;
+import service.threadPoolSubsystem.ThreadPoolManager;
 
 import javax.jws.WebMethod;
 import javax.jws.WebService;
@@ -20,7 +23,9 @@ public class AsyncImpl implements AsyncInterface {
         Endpoint.publish("http://localhost:8888/", new AsyncImpl());
         System.out.println("service started!");
         MyQueue.addListener(new QueueProcessor());
-        System.out.println("queue processor added to queue listeners");
+        System.out.println("Queue Processor subsystem added to queue listeners");
+        MyQueue.addListener(new ThreadPoolManager());
+        System.out.println("Thread Pool subsystem added to queue listeners");
     }
 
     // Тут обрабатываю запросы от клиентов
