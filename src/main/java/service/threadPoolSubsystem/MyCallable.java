@@ -14,10 +14,21 @@ public class MyCallable implements Callable<String> {
 
     @Override
     public String call() throws Exception {
+
+        // симуляция долго выполняющегося запроса
         Random r = new Random();
         int mills = r.nextInt(5000);
         Thread.sleep(mills);
-        return Thread.currentThread().getName() + " \t value: " + arg0 + "\t mills: " + mills;
 
+        // настоящая работа
+        String result;
+        switch (arg0) {
+            case ("INN"):
+                return "770088994455";
+
+            case ("RND"):
+                return String.valueOf(r.nextInt(10000));
+        }
+        return null;
     }
 }

@@ -1,30 +1,31 @@
 package service.threadPoolSubsystem;
 
+import service.threadPoolSubsystem.QueueSubsystem.MyQueue;
 import service.threadPoolSubsystem.QueueSubsystem.QueueListener;
 
-import java.util.concurrent.ExecutionException;
+import java.util.HashMap;
+import java.util.Map;
 
-public class ThreadPoolManager implements QueueListener {
-    // FIELDS
-    boolean isSomethingInbound = false;
+public class ThreadPoolManager implements QueueListener, ThreadPoolListener {
+
     ThreadPool threadPool;
 
-    {
-        try {
-            threadPool = new ThreadPool();
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+    public ThreadPoolManager() {
+        threadPool = new ThreadPool();
+        threadPool.addThreadPoolListener(this);
     }
-
 
     @Override
     public void onInboundQueueMessageAdded() {
-        Thread freeThread = threadPool.getFreeThread();
-        if (freeThread != null){
-            freeThread.start();
-            freeThread.run();
-        }
+            Map.Entry<Integer, String> entry = MyQueue.getInbound();
+            threadPool.addFutureCallable(entry.getKey(), entry.getValue());
     }
 
+    @Override
+    public void onThreadPoolResultsReady(HashMap<Integer, String> results) {
+        // добавляем всё в исходящие
+        for(Map.Entry<Integer, String> entry : results.entrySet()) {
+            MyQueue.addOutbound(entry.getKey(), entry.getValue());
+        }
+    }
 }

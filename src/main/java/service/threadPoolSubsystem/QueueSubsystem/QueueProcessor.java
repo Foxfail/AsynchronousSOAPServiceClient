@@ -103,11 +103,7 @@ public class QueueProcessor implements QueueListener {
 
     @Override
     public void onInboundQueueMessageAdded() {
-
             processQueue();
-
-
-
     }
 
     @Override

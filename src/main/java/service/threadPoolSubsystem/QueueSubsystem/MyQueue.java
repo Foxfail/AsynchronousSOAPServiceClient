@@ -15,7 +15,7 @@ public class MyQueue {
         notifyInboundQueueChanged();
         return inID;
     }
-    static Integer addOutbound(Integer inID, String message) {
+    public static Integer addOutbound(Integer inID, String message) {
         outboundQueue.put(inID, message);
         System.out.println("adding outbound id = " + inID);
         notifyOutboundQueueChanged();
@@ -23,14 +23,15 @@ public class MyQueue {
     }
 
 
-    static Map.Entry<Integer, String> getInbound() {
+    public static Map.Entry<Integer, String> getInbound() {
         Map.Entry<Integer, String> entry = inboundQueue.entrySet().iterator().next();
         System.out.println("getting and removing inbound. id = " + entry.getKey());
         inboundQueue.remove(entry.getKey());
         return entry;
     }
-    public static String getOutbound() {
-        return outboundQueue.remove(0);
+    public static String getOutbound(Integer inID) {
+        // возвращает null если нет элемента с таким ключем
+        return outboundQueue.remove(inID);
     }
 
     public static void addListener(QueueListener listener){

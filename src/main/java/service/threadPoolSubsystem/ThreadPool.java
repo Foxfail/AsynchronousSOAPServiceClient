@@ -1,7 +1,6 @@
 package service.threadPoolSubsystem;
 
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,51 +8,76 @@ import java.util.concurrent.Future;
 
 public class ThreadPool {
 
+
+    @SuppressWarnings("FieldCanBeLocal")
     private final int number_of_threads = 10;
-    Thread[] threadPool = new Thread[number_of_threads];
+    private ExecutorService threadPool; // здесь экзекутор хранит потоки и управлет ими, отправля фьючерсы на исполнение свободным потокам
+    private ArrayList<ThreadPoolListener> threadPoolListeners;
+    private HashMap<Integer, Future<String>> futures; // ключ - номер входящего запроса, значение future которое ему соответсвует
 
     // CONSTRUCTOR
-    ThreadPool() throws ExecutionException, InterruptedException {
-        // инициализация тредов
-        for (Thread thread : threadPool)
-            thread = new Thread();
+    ThreadPool() {
+        // создаем пул потоков
+        threadPool = Executors.newFixedThreadPool(number_of_threads);
+        // инициализируем фьючерсы
+        futures = new HashMap<>();
+        // инициализируем слушателей
+        threadPoolListeners = new ArrayList<>();
 
-        ExecutorService executor = Executors.newFixedThreadPool(number_of_threads);
-
-        LinkedList<Future<String>> futures = new LinkedList<>();
-        for (int i = 0; i < 100; i++) {
-            Future<String> future = executor.submit(new MyCallable(String.valueOf(i)));
-            futures.add(future);
-        }
-
-        while (futures.size() > 0) {
-            Iterator iterator = futures.iterator();
-            while (iterator.hasNext()) {
-                Object o = iterator.next();
-                Future future = null;
-                if (o instanceof Future) {
-                    future = (Future) o;
-                }
-                assert future != null;
-                if (future.isDone()) {
-                    System.out.println(future.get());
-                    iterator.remove();
+        // проверяю в новом треде (каждые 10 мсек) готов ли какой нибудь запрос (готовых может быть несколько)
+        // вызываю у слушателей метод onThreadPoolResultsReady в который передаю массив с результатами
+        new Thread(() -> {
+            while (futures.size() > 0) {
+                try {
+                    Thread.sleep(10);
+                    HashMap<Integer, String> results = getFuturesResults();
+                    if (results.size() > 0) {
+                        for (ThreadPoolListener listener : threadPoolListeners) {
+                            listener.onThreadPoolResultsReady(results);
+                        }
+                    }
+                } catch (ExecutionException | InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
+        });
+    }
+
+
+    // добавляет в фьючерсы по айди и строке запроса от клиента
+    public void addFutureCallable(Integer InID, String request) {
+        Future<String> future = threadPool.submit(new MyCallable(request));
+        futures.put(InID, future);
+    }
+
+
+    // возврящает массив результатов, которые были подготовлены в этом проходе по фьючерсам
+    // результирующий массив может быть возвращен пустым
+    public HashMap<Integer, String> getFuturesResults() throws ExecutionException, InterruptedException {
+        HashMap<Integer, String> resultIntegerStringHashMap = new HashMap<>();
+        Iterator iterator = futures.entrySet().iterator();
+        while (iterator.hasNext()) {
+            //noinspection unchecked
+            Map.Entry<Integer, Future<String>> entry = (Map.Entry<Integer, Future<String>>) iterator.next();
+            Future<String> future = entry.getValue();
+            if (future.isDone()) {
+                resultIntegerStringHashMap.put(entry.getKey(), future.get());
+                iterator.remove();
+            }
         }
-        executor.shutdown();
+        return resultIntegerStringHashMap;
     }
 
-    // если есть свободный тред - возвращает его
-    // иначе возвращает null
-    Thread getFreeThread() {
-        for (Thread thread : threadPool)
-            if (thread.isAlive()) return thread;
-        return null;
+
+    public void addThreadPoolListener(ThreadPoolListener listener) {
+        //
+        threadPoolListeners.add(listener);
     }
 
-    public static void main(String[] args) throws Exception {
-        ThreadPool threadPool = new ThreadPool();
 
+    // завершает экзекутор с пулом тредов
+    public void shutdown() {
+        threadPool.shutdown();
     }
+
 }
