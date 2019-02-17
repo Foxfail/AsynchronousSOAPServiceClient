@@ -46,7 +46,7 @@ public class ThreadPool {
                             listener.onThreadPoolResultsReady(results);
                         }
                     }
-                } catch (ExecutionException | InterruptedException e) {
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
