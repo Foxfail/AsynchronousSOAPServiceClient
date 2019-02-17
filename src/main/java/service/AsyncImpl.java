@@ -22,8 +22,8 @@ public class AsyncImpl implements AsyncInterface {
     public static void main(String[] args) {
         Endpoint.publish("http://localhost:8888/", new AsyncImpl());
         System.out.println("service started!");
-        MyQueue.addListener(new QueueProcessor());
-        System.out.println("Queue Processor subsystem added to queue listeners");
+//        MyQueue.addListener(new QueueProcessor());
+//        System.out.println("Queue Processor subsystem added to queue listeners");
         MyQueue.addListener(new ThreadPoolManager());
         System.out.println("Thread Pool subsystem added to queue listeners");
     }
@@ -37,15 +37,14 @@ public class AsyncImpl implements AsyncInterface {
         System.out.println("addDataRequest inbound");
 
         Integer inID = MyQueue.addInbound(message);
-        System.out.println("sending inbound id = " + inID);
+        System.out.println("addDataRequest added id = " + inID);
         return inID;
     }
 
     @WebMethod
     public String pollForResult(Integer inID) {
-        // тут обрабатываются ответы на запросы.
-        // поскольку сервер не делает запросов, то и ответов никаких от клиента не надо обрабатывать
-        return null;
+        // тут обрабатывается опрос от клиента
+        return MyQueue.getOutbound(inID);
     }
 //    static void messageProcessed(String callback) {
 //        SOAPMessage message = MyQueue.getOutbound();

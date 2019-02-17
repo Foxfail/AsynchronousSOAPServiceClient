@@ -24,12 +24,22 @@ public class ThreadPool {
         // инициализируем слушателей
         threadPoolListeners = new ArrayList<>();
 
+
+    }
+
+
+    // добавляет в фьючерсы по айди и строке запроса от клиента
+    void addFutureCallable(Integer InID, String request) {
+        Future<String> future = threadPool.submit(new MyCallable(request));
+        futures.put(InID, future);
+
+
         // проверяю в новом треде (каждые 10 мсек) готов ли какой нибудь запрос (готовых может быть несколько)
         // вызываю у слушателей метод onThreadPoolResultsReady в который передаю массив с результатами
         new Thread(() -> {
             while (futures.size() > 0) {
                 try {
-                    Thread.sleep(10);
+                    Thread.sleep(1000);
                     HashMap<Integer, String> results = getFuturesResults();
                     if (results.size() > 0) {
                         for (ThreadPoolListener listener : threadPoolListeners) {
@@ -40,36 +50,47 @@ public class ThreadPool {
                     e.printStackTrace();
                 }
             }
-        });
-    }
-
-
-    // добавляет в фьючерсы по айди и строке запроса от клиента
-    public void addFutureCallable(Integer InID, String request) {
-        Future<String> future = threadPool.submit(new MyCallable(request));
-        futures.put(InID, future);
+        }).start();
     }
 
 
     // возврящает массив результатов, которые были подготовлены в этом проходе по фьючерсам
     // результирующий массив может быть возвращен пустым
-    public HashMap<Integer, String> getFuturesResults() throws ExecutionException, InterruptedException {
+    private HashMap<Integer, String> getFuturesResults() {
+        System.out.println("getFuturesResults()");
         HashMap<Integer, String> resultIntegerStringHashMap = new HashMap<>();
-        Iterator iterator = futures.entrySet().iterator();
-        while (iterator.hasNext()) {
-            //noinspection unchecked
-            Map.Entry<Integer, Future<String>> entry = (Map.Entry<Integer, Future<String>>) iterator.next();
-            Future<String> future = entry.getValue();
-            if (future.isDone()) {
-                resultIntegerStringHashMap.put(entry.getKey(), future.get());
-                iterator.remove();
+
+
+        Iterator<Map.Entry<Integer, Future<String>>> iterator = futures.entrySet().iterator();
+        HashSet<Map.Entry> entriesToDelete = new HashSet<>();
+        entriesToDelete.clear();
+        Map.Entry<Integer, Future<String>> entry = null;
+        try {
+            while (iterator.hasNext()) {
+                entry = iterator.next();
+                Future<String> future = entry.getValue();
+                if (future.isDone()) {
+                    resultIntegerStringHashMap.put(entry.getKey(), future.get());
+                    entriesToDelete.add(entry);
+                }
+            }
+        } catch (Exception e) {
+            if (entry != null) {
+                System.out.println("!!!!!!!! Exception in " + entry.getKey().toString());
+                e.printStackTrace();
+            }
+        } finally {
+            if (entriesToDelete.size() > 0) {
+                for (Map.Entry entryToDelete : entriesToDelete) {
+                    futures.remove(entryToDelete.getKey());
+                }
             }
         }
         return resultIntegerStringHashMap;
     }
 
 
-    public void addThreadPoolListener(ThreadPoolListener listener) {
+    void addThreadPoolListener(ThreadPoolListener listener) {
         //
         threadPoolListeners.add(listener);
     }

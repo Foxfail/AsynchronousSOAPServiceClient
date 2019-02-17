@@ -1,5 +1,6 @@
 package service.queueSubsystem;
 
+import javax.validation.constraints.NotNull;
 import java.util.*;
 
 public class MyQueue {
@@ -11,13 +12,14 @@ public class MyQueue {
 
     public static Integer addInbound(String message) {
         inID++;
+        System.out.println("addInbound() id = " + inID);
         inboundQueue.put(inID, message);
         notifyInboundQueueChanged();
         return inID;
     }
     public static Integer addOutbound(Integer inID, String message) {
         outboundQueue.put(inID, message);
-        System.out.println("adding outbound id = " + inID);
+        System.out.println("addOutbound() id = " + inID);
         notifyOutboundQueueChanged();
         return inID;
     }
@@ -25,7 +27,7 @@ public class MyQueue {
 
     public static Map.Entry<Integer, String> getInbound() {
         Map.Entry<Integer, String> entry = inboundQueue.entrySet().iterator().next();
-        System.out.println("getting and removing inbound. id = " + entry.getKey());
+        System.out.println("getInbound() id = " + entry.getKey());
         inboundQueue.remove(entry.getKey());
         return entry;
     }

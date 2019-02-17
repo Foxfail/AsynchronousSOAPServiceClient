@@ -18,10 +18,10 @@ public class MyCallable implements Callable<String> {
         // симуляция долго выполняющегося запроса
         Random r = new Random();
         int mills = r.nextInt(5000);
-        Thread.sleep(mills);
+        Thread.sleep(100);
 
         // настоящая работа
-        String result;
+        System.out.println(Thread.currentThread().getName() + "\t arg0: " + arg0);
         switch (arg0) {
             case ("INN"):
                 return "770088994455";
@@ -29,6 +29,7 @@ public class MyCallable implements Callable<String> {
             case ("RND"):
                 return String.valueOf(r.nextInt(10000));
         }
+
         return null;
     }
 }

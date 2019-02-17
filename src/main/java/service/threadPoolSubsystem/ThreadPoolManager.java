@@ -24,7 +24,9 @@ public class ThreadPoolManager implements QueueListener, ThreadPoolListener {
     @Override
     public void onThreadPoolResultsReady(HashMap<Integer, String> results) {
         // добавляем всё в исходящие
+
         for(Map.Entry<Integer, String> entry : results.entrySet()) {
+            System.out.println("ResultReady! id " + entry.getKey());
             MyQueue.addOutbound(entry.getKey(), entry.getValue());
         }
     }
