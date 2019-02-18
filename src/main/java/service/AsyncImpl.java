@@ -1,8 +1,8 @@
 package service;
 
+import com.google.gson.Gson;
 import contract.AsyncInterface;
 import service.queueSubsystem.MyQueue;
-import service.queueSubsystem.QueueProcessor;
 import service.threadPoolSubsystem.ThreadPoolManager;
 
 import javax.jws.WebMethod;
@@ -18,6 +18,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @WebService(targetNamespace = "http://localhost:8888/")
 @SOAPBinding(style = SOAPBinding.Style.DOCUMENT)
+
 public class AsyncImpl implements AsyncInterface {
 
 
@@ -44,9 +45,20 @@ public class AsyncImpl implements AsyncInterface {
         return inID;
     }
 
-    @Override
-    public HashMap<Integer, String> pollForResult(List<Integer> idsList) {
-        return null;
+    @WebMethod
+    public String pollForResults(List<Integer> idsList) {
+        // запрос от клиента по массиву ИДшников
+
+         HashMap<Integer, String> resultHashMap = new HashMap<>();
+        for (Integer id : idsList) {
+            String data = MyQueue.getOutbound(id); // возвращает null если нет такого элемента в очереди исходящих
+            if (data != null) {
+                // складываю в результат только не null
+                resultHashMap.put(id, data);
+            }
+        }
+        Gson gson = new Gson();
+        return gson.toJson(resultHashMap);
     }
 
     @WebMethod

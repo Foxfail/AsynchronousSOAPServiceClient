@@ -1,5 +1,5 @@
 
-package client;
+package delete_client_delete;
 
 
 import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
@@ -13,7 +13,7 @@ import java.net.URL;
 import java.util.Base64;
 
 
-public class Client implements AsyncInterface, Serializable {
+public class Client {
     public static void main(String[] args) throws IOException, SOAPException {
         URL wsdlURL = new URL("http://localhost:8888/?wsdl");
         QName qNameService = new QName("http://localhost:8888/", "AsyncImplService");
@@ -49,7 +49,6 @@ public class Client implements AsyncInterface, Serializable {
     }
 
     // тут обрабатывались бы запросы от сервиса, если бы он их слал
-    @Override
     public Integer addDataRequest(String message) {
         return 0;
     }
@@ -104,7 +103,7 @@ public class Client implements AsyncInterface, Serializable {
 
         QName nameCallback = new QName("dataCallback");
         SOAPElement symbolCallback = bodyElement.addChildElement(nameCallback);
-        symbolCallback.addTextNode(toString(clientCallback));
+//        symbolCallback.addTextNode(toString(clientCallback));
 
         soapMessage.saveChanges(); // сохраняет изменения ???
         System.out.println(soapToString(soapMessage)); // выводит xml в консоль
