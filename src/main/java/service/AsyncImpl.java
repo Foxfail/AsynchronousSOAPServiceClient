@@ -11,6 +11,8 @@ import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.ws.Endpoint;
+import java.util.HashMap;
+import java.util.List;
 
 @SuppressWarnings("DefaultAnnotationParam")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -22,6 +24,7 @@ public class AsyncImpl implements AsyncInterface {
     public static void main(String[] args) {
         Endpoint.publish("http://localhost:8888/", new AsyncImpl());
         System.out.println("service started!");
+        // обработчик очереди больше не нужен т.к. обрабатывается всё в MyCallable
 //        MyQueue.addListener(new QueueProcessor());
 //        System.out.println("Queue Processor subsystem added to queue listeners");
         MyQueue.addListener(new ThreadPoolManager());
@@ -41,9 +44,15 @@ public class AsyncImpl implements AsyncInterface {
         return inID;
     }
 
+    @Override
+    public HashMap<Integer, String> pollForResult(List<Integer> idsList) {
+        return null;
+    }
+
     @WebMethod
     public String pollForResult(Integer inID) {
         // тут обрабатывается опрос от клиента
+        System.out.println("pollForResult(" + inID + ")");
         return MyQueue.getOutbound(inID);
     }
 //    static void messageProcessed(String callback) {

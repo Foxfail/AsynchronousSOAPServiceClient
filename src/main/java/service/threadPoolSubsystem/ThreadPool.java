@@ -1,7 +1,6 @@
 package service.threadPoolSubsystem;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -19,12 +18,10 @@ public class ThreadPool {
     ThreadPool() {
         // создаем пул потоков
         threadPool = Executors.newFixedThreadPool(number_of_threads);
-        // инициализируем фьючерсы
+        // инициализируем фьючерсы (очередь заданий которые будут выполнены пулом потоков)
         futures = new HashMap<>();
-        // инициализируем слушателей
+        // инициализируем слушателей, которые будут получать уведомления о выполненых пулом заданиях
         threadPoolListeners = new ArrayList<>();
-
-
     }
 
 
@@ -32,11 +29,13 @@ public class ThreadPool {
     void addFutureCallable(Integer InID, String request) {
         Future<String> future = threadPool.submit(new MyCallable(request));
         futures.put(InID, future);
+        threadPoolPollingThread().start();
+    }
 
-
-        // проверяю в новом треде (каждые 10 мсек) готов ли какой нибудь запрос (готовых может быть несколько)
-        // вызываю у слушателей метод onThreadPoolResultsReady в который передаю массив с результатами
-        new Thread(() -> {
+    // проверяю в новом треде (каждые 10 мсек) готов ли какой нибудь запрос (готовых может быть несколько)
+    // вызываю у слушателей метод onThreadPoolResultsReady в который передаю массив с результатами
+    private Thread threadPoolPollingThread(){
+        return new Thread(() -> {
             while (futures.size() > 0) {
                 try {
                     Thread.sleep(1000);
@@ -50,9 +49,8 @@ public class ThreadPool {
                     e.printStackTrace();
                 }
             }
-        }).start();
+        });
     }
-
 
     // возврящает массив результатов, которые были подготовлены в этом проходе по фьючерсам
     // результирующий массив может быть возвращен пустым
@@ -91,7 +89,7 @@ public class ThreadPool {
 
 
     void addThreadPoolListener(ThreadPoolListener listener) {
-        //
+        // добавляет слушателя
         threadPoolListeners.add(listener);
     }
 
